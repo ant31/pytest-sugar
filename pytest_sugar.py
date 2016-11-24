@@ -114,21 +114,23 @@ def pytest_addoption(parser):
 def pytest_sessionstart(session):
     global LEN_PROGRESS_BAR_SETTING
     config = ConfigParser()
-    config.read(['pytest-sugar.conf', os.path.expanduser('~/.pytest-sugar.conf')])
-
+    config.read(['pytest-sugar.conf', os.path.expanduser('~/.pytest-sugar.conf'), 'setup.cfg'])
+    theme_sections = ["tool:pytest-sugar:theme", "theme"]
+    sugar_sections = ["tool:pytest-sugar:sugar", "sugar"]
     for key in THEME:
-        if not config.has_option('theme', key):
-            continue
+        for theme_section in theme_sections:
+            if not config.has_option(theme_section, key):
+                continue
 
-        value = config.get("theme", key)
-        value = value.lower()
-        if value in ('', 'none'):
-            value = None
+            value = config.get(theme_section, key)
+            value = value.lower()
+            if value in ('', 'none'):
+                value = None
+            THEME[key] = value
 
-        THEME[key] = value
-
-    if config.has_option('sugar', 'progressbar_length'):
-        LEN_PROGRESS_BAR_SETTING = config.get('sugar', 'progressbar_length')
+    for sugar_section in sugar_sections:
+        if config.has_option(sugar_section, 'progressbar_length'):
+            LEN_PROGRESS_BAR_SETTING = config.get(sugar_section, 'progressbar_length')
 
 
 def strip_colors(text):
